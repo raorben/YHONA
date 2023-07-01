@@ -9,21 +9,52 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Project Overview
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+  Yaquina Head Outstanding Natural Area (YHONA) is home to some of Oregon’s largest and most publicly visible seabird colonies, and has included over 60,000 Common Murres (Uria aalge) in peak attendance years. The seabird colonies surrounding Yaquina Head present a unique opportunity for research and monitoring given their close proximity to viewing platforms and intensive oceanographic studies of surrounding waters. From 1980 to 2010 the common murre population at Yaquina Head experienced rapid growth and reproductive success however, there has been significant fluctuation and reproductive failures over the last 8-10 years. 
+	In general, we are interested in how seabird breeding chronology, reproductive success, diet, and foraging activities are affected by changing ocean conditions. However, another important dynamic occurring at Yaquina Head is murre depredation coincident with increasing bald eagle (Haliaeetus leucocephalus) interactions. Our study objectives include quantifying the effects of bald eagles and other sources of predation on or disturbance to seabirds during the breeding season. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Field Season Summary 
+	 The 2023 field season was the 17th consecutive year of murre productivity monitoring; a collaborative effort between Oregon State University, U.S. Fish and Wildlife Service, and the Bureau of Land Management. In combination with similar studies conducted by Julia Parrish of the University of Washington from 1998 – 2002, our investigation of seabirds at Yaquina Head has contributed to a 22-year time series of observation. 
+	Observations were conducted from the public viewing deck at the base of the lighthouse. Construction modified the viewing deck slightly from previous years making the viewing platform slightly lower. Plots were monitored from May through August three to four days per week (about every other day). Common murre nest checks began in late May, however nesting attempts were repeatedly disturbed and rocks were frequently abandoned when the monitoring team arrived in the morning. Murres failed to successfully establish nests in 2022, leading to a total breeding failure for common murres at Yaquina Head. Eggs at nest sites were spotted frequently early in the breeding season, but egg depredation was observed within the same day of each confirmed egg sighting in all cases. We observed disturbances to the breeding colony and recorded the frequency, duration and consequences (e.g., loss of eggs or chicks) of these events during our cormorant monitoring efforts. In years with more successful breeding, we closely observed breeding birds, documented when eggs were laid and then monitored the progressive success of the breeding pairs through egg incubation and chick rearing. 
+  We also collected Brandt’s (Urile penicillatus) and pelagic (Urile pelagicus) cormorant data during the 2022 breeding season. Pelagic cormorants also failed to successfully reproduce at Yaquina Head in 2022, although it is important to note that our site for pelagic cormorant nesting habitat usually contributes a relatively modest number of pelagic cormorant nests in a given year (compared to Brandt’s cormorants, or at other sites along the Oregon coast). Cormorant monitoring began on 30 May, and the earliest chicks were confirmed by 7 June (Brandt’s). This was the 15th consecutive year of collecting reproductive success data for cormorants at Yaquina Head. 
+ 	We typically conduct chick provisioning watches one day per week over four weeks from July to August. During the watches we collected chick feeding frequency from sunrise to sunset, which provides an indirect indication of local prey availability and foraging success. Due to common murre productivity failure at Yaquina Head, we did not conduct chick provisioning watches in 2022. We also typically collect common murre diet composition data using a digital camera (Canon 600/F4 lens with a 2x converter on a Canon 1D X Mark II) to photograph fish in the bills of murres returning to the colony after foraging trips. This allows us to analyze the birds’ diet and provide information about foraging and oceanographic conditions adjacent to these seabird colonies, however due to the absence of nests and chicks we were unable to collect these data at this Yaquina Head in 2022. Alternatively, we collected prey and diet composition photos at Pirate Rock colony, north of Yaquina Head in Depoe Bay, Oregon. Analysis is forthcoming.
+Yaquina Head is located within the larger California Current System (CCS), which means that the Oregon coast experiences cyclic seasonal localized up- and downwelling events, which greatly impact coastal primary productivity and the marine food web (upwelling is typically associated with high productivity and fruitful commercial fishing areas). In 2022 the CCS entered a third La Niña/ ENSO (ENSO (El Niño Southern Oscillation) l year. Sea surface temperatures off Newport in spring 2022 were lower than average (~7.8°C) in May, June, and July, increasing steadily through the end of our monitoring season to about average in August. Upwelling winds typically begin off Newport in April and facilitate the transport of nutrient rich water closer to shore and the surface where it is more readily available to marine organisms. In 2022, upwelling was delayed well into until June, with food web wide effects that are still be analyzed. 
+
+## Results
+
+	In 2022 we logged approximately 97 hours of observation between 6 June and 17 August. Common murres failed to successfully establish nests at hatch and fledge chicks and at all observed monitoring sites at Yaquina Head (Fig. 1, 2). This was a shift from average reproductive success in 2021, and is in line with high variability in productivity observed at Yaquina Head over the past decade. 
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Throughout our study period we documented 24 disturbance events (0.25/hour) where a minimum of 35 murre eggs and 3 adult murres were depredated (Table 1). Disturbance rates were lower than recent years, although it is important to note that because the murres failed to establish nests, there were fewer opportunities for eagles to hunt at the colony. The 2022 rate of murre egg depredation (0.36 eggs/hr) was lower than the long-term mean (with and without the highest rate of egg depredations in 2020), and the lowest rate of egg depredation observed at the site since 2009. Again, a diminished supply of eggs is the likely reason behind these low egg depredation rates. Often disturbance events were already in progress when observers arrived at the colony and not all predation events were observed, therefore, the rate of egg and adult murre loss should be considered conservative estimates. Bald eagles were again the dominant disturbance source, instigating all observed disturbance events. 
 
 ```{r cars}
 summary(cars)
 ```
 
+We also observed a minimum of 220 western gulls, and 3 turkey vultures (Cathartes aura) present foraging and scavenging opportunistically over all disturbance events. There were no disturbances caused by brown pelicans (source of devastating disturbance in 2012), although pelicans were observed roosting on the north and east ends of Colony Rock sub colony.
+
+```{r cars1}
+summary(cars)
+```
+
+Murre diets vary annually and are generally dominated by either herring or sardines (Clupeidae), Pacific sand lance (Ammodytes hexapterus), or smelt (Osmeridae), but occasionally occur in relatively equal proportions in a given year (Fig. 3). Due to the breeding failure at Yaquina Head in 20222, we did not collect diet data at the site, however we did collect diet data at the Pirate Rock murre colony approximately 17 km (11 miles) north off of Depoe Bay, Oregon. Murres diets at Pirate Rock in 2022 were dominated by smelts (~36% of observations) and clupeids (anchovy, herring, sardines; ~21%). Juvenile salmon, which are grouped with the ‘other’ category in Fig. 3, accounted for approximately 7.2% of the sampled diet; higher than observed at YHONA in recent years (Fig. 3).Analysis is forthcoming. 
+
+```{r cars2}
+summary(cars)
+```
+
+Brandt’s cormorants had average reproductive success at Yaquina Head in 2022, however breeding attempts of pelagic cormorants at the site failed.  Both reproductive success (1.06 fledglings/nest) and average brood size (1.87 chicks/nest) for Brandt’s cormorants were lower than 2021 and the long-term mean (Table 2). Median hatch date was 11 July, two days later than the long term mean for Brandt’s cormorants at YHONA. Pelagic (P. pelagicus) cormorants had a failed breeding year at Yaquina Head in 2022, and were not observed attending or nest building in coves at Yaquina Head where they have had previous and long-standing success. 
+
+
 ## Including Plots
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
+```{r pressure1, echo=FALSE}
 plot(pressure)
 ```
 
