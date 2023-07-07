@@ -1,4 +1,4 @@
-library(readr) #for read_csv that inturprets dates for you
+library(readr) #for read_csv that interprets dates for you
 library(lubridate)
 library(dplyr)
 library(tidyr)
