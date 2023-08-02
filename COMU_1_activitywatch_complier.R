@@ -124,7 +124,9 @@ pairsum<-act%>%group_by(year,date,Sub.Colony, pair)%>%
   filter(act=="ChFd")%>%
   summarise(n=n())
 
+actC_durS<-actC_dur%>%select(-FELL,-KILLED,-MF,-FST,-BL0,-BL2,-'NO feed',-FLEDGE)
 
+write.csv(actC_durS,paste0(usrdir,SOL,"/ActivityDataSUM.csv"))
 
 # Quik Viz ----------------------------------------------------------------
 names(actC_dur)
@@ -150,5 +152,14 @@ ggplot()+
 ggplot()+
   geom_boxplot(data=actC_dur%>%filter(DurObs>500),
                aes(x=year,y=ChFd_hr, group=as.factor(date)))+facet_wrap(~year, scales = "free_x")
+
+actC_dur%>%group_by(year)%>%
+  summarise(uDelivier=mean(ChFd_hr, na.rm=TRUE),
+              sdDeli=sd(ChFd_hr, na.rm=TRUE),
+            n=n(),
+            nDays=n_distinct(date))
+ 
+
+
 
                
