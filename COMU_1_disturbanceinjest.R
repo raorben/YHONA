@@ -9,10 +9,12 @@ library(gridExtra)
 
 if(Sys.info()[["user"]]=="rachaelorben") {
   usrdir<-"/Users/rachaelorben/Library/CloudStorage/GoogleDrive-orbenr@oregonstate.edu/.shortcut-targets-by-id/0B1NPKZM3lphEY0lEa19IcVJKT0E/";
-  SOL<-"Seabird_Oceanography_Lab/YHONA_monitoring/YHONA_COMU_allyears";
-  anadir<-"Seabird_Oceanography_Lab/COMU_TopDown_BottomUp/YHONA_tdbu_Analysis";
 }
 
+if(Sys.info()[7]=="kennerlw") {usrdir<-"/Users/kennerlw"}
+
+SOL<-"Seabird_Oceanography_Lab/YHONA_monitoring/YHONA_COMU_allyears";
+anadir<-"Seabird_Oceanography_Lab/COMU_TopDown_BottomUp/YHONA_tdbu_Analysis";
 
 files<-list.files(paste0(usrdir,SOL),pattern = "Disturbance_",full.names = T,recursive = T)
 
