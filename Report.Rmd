@@ -2,11 +2,13 @@
 title: "Yaquina Head Annual Report"
 author: "Rachael Orben"
 date: "2023-07-01"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Project Overview
@@ -44,7 +46,51 @@ summary(cars)
 Murre diets vary annually and are generally dominated by either herring or sardines (Clupeidae), Pacific sand lance (Ammodytes hexapterus), or smelt (Osmeridae), but occasionally occur in relatively equal proportions in a given year (Fig. 3). Due to the breeding failure at Yaquina Head in 20222, we did not collect diet data at the site, however we did collect diet data at the Pirate Rock murre colony approximately 17 km (11 miles) north off of Depoe Bay, Oregon. Murres diets at Pirate Rock in 2022 were dominated by smelts (~36% of observations) and clupeids (anchovy, herring, sardines; ~21%). Juvenile salmon, which are grouped with the ‘other’ category in Fig. 3, accounted for approximately 7.2% of the sampled diet; higher than observed at YHONA in recent years (Fig. 3).Analysis is forthcoming. 
 
 ```{r cars2}
-summary(cars)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+diet<- read.csv(file = "/Users/rachaelorben/Library/CloudStorage/GoogleDrive-orbenr@oregonstate.edu/.shortcut-targets-by-id/1FGtszGE_J2Df0SNhyzHiTfVhI25SbaLV/McKay HMSC REU/Analysis/modified_data/01_tidy_data/COMU_Diet_2007_2021_Tidy.csv")
+
+diet$ID_oth<-diet$TRUE_ID
+diet$ID_oth[diet$TRUE_ID=="anarhichadidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="atherinidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="bothidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="cottidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="crustacea"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="embiotocidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="gadidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="hexagrammidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="loligo"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="scomberesocidae"]<-"other"
+diet$ID_oth[diet$TRUE_ID=="engraulididae"]<-"other"
+
+
+smple_sze<-diet%>%group_by(Yr)%>%summarise(n=n())
+smple_sze<-diet%>%filter(ID_oth!="unidentified")%>%
+    group_by(Yr)%>%summarise(n=n())
+
+
+diet$Yr<-as.factor(diet$Yr)
+diet %>%
+  filter(Yr %in% c("2011", "2012", "2013", "2014", "2015","2016", "2017", 
+                   "2018", "2019", "2020", "2021")) %>%
+  filter(TRUE_ID %in% c("ammodytes", "clupeidae", "osmeridae", 
+                        "pleuronectiformes", "salmonidae", "sebastes"))%>%
+  filter(TRUE_ID_CERTAINTY %in% c("50", "75", "100")) %>%
+  drop_na(ID_oth)%>%
+  ggplot(aes(x=Yr))+
+  geom_bar(aes(fill=ID_oth),position = "fill", alpha=0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 30))+
+  labs(title = "Proportion of Diet Species Per Year",
+       x= "Year",
+       y= "Total Prey Composition")+ 
+  guides(fill = guide_legend(title = "Species Taxon"))
+#ggsave(paste0(ursdir,"/03_plots/StackedDiet_proportion.png"))
+
+
 ```
 
 Brandt’s cormorants had average reproductive success at Yaquina Head in 2022, however breeding attempts of pelagic cormorants at the site failed.  Both reproductive success (1.06 fledglings/nest) and average brood size (1.87 chicks/nest) for Brandt’s cormorants were lower than 2021 and the long-term mean (Table 2). Median hatch date was 11 July, two days later than the long term mean for Brandt’s cormorants at YHONA. Pelagic (P. pelagicus) cormorants had a failed breeding year at Yaquina Head in 2022, and were not observed attending or nest building in coves at Yaquina Head where they have had previous and long-standing success. 
