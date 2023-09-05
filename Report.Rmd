@@ -49,6 +49,7 @@ Murre diets vary annually and are generally dominated by either herring or sardi
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
+#this file path works for RAO, but plot is not the same as final verion on poster...
 diet<- read.csv(file = "/Users/rachaelorben/Library/CloudStorage/GoogleDrive-orbenr@oregonstate.edu/.shortcut-targets-by-id/1FGtszGE_J2Df0SNhyzHiTfVhI25SbaLV/McKay HMSC REU/Analysis/modified_data/01_tidy_data/COMU_Diet_2007_2021_Tidy.csv")
 
 diet$ID_oth<-diet$TRUE_ID
