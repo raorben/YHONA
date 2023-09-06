@@ -49,6 +49,8 @@ Murre diets vary annually and are generally dominated by either herring or sardi
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
+library(MetBrewer)
+
 #this file path works for RAO, but plot is not the same as final verion on poster...
 diet<- read.csv(file = "/Users/rachaelorben/Library/CloudStorage/GoogleDrive-orbenr@oregonstate.edu/.shortcut-targets-by-id/1FGtszGE_J2Df0SNhyzHiTfVhI25SbaLV/McKay HMSC REU/Analysis/modified_data/01_tidy_data/COMU_Diet_2007_2021_Tidy.csv")
 
@@ -73,22 +75,23 @@ smple_sze<-diet%>%filter(ID_oth!="unidentified")%>%
 
 diet$Yr<-as.factor(diet$Yr)
 diet %>%
-  filter(Yr %in% c("2011", "2012", "2013", "2014", "2015","2016", "2017", 
+  filter(year %in% c("2011", "2012", "2013", "2014", "2015","2016", "2017", 
                    "2018", "2019", "2020", "2021")) %>%
   filter(TRUE_ID %in% c("ammodytes", "clupeidae", "osmeridae", 
                         "pleuronectiformes", "salmonidae", "sebastes"))%>%
   filter(TRUE_ID_CERTAINTY %in% c("50", "75", "100")) %>%
   drop_na(ID_oth)%>%
-  ggplot(aes(x=Yr))+
-  geom_bar(aes(fill=ID_oth),position = "fill", alpha=0.5)+
-  theme_bw()+
+  ggplot(aes(x=year))+
+  geom_bar(aes(fill=ID_oth),position = "fill")+
+  scale_fill_manual(values = met.brewer("Hokusai3", 6))+
+  theme(text = element_text(size=16))+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 30))+
-  labs(title = "Proportion of Diet Species Per Year",
-       x= "Year",
-       y= "Total Prey Composition")+ 
-  guides(fill = guide_legend(title = "Species Taxon"))
+  labs(x= " ",
+       y= " ")+ 
+  guides(fill = guide_legend(title = "Species"))
+
 #ggsave(paste0(ursdir,"/03_plots/StackedDiet_proportion.png"))
 
 
