@@ -8,7 +8,8 @@ library(ggplot2)
 ##convertToDate(effor17$Date)
 
 if(Sys.info()[["user"]]=="rachaelorben") {
-  dir<-"/Volumes/GoogleDrive/My Drive/Seabird_Oceanography_Lab/YHONA_monitoring/YHONA_COMU_allyears"
+  gdir<-"/Users/rachaelorben/Library/CloudStorage/GoogleDrive-orbenr@oregonstate.edu/.shortcut-targets-by-id/0B1NPKZM3lphEY0lEa19IcVJKT0E/Seabird_Oceanography_Lab/"
+  dir<-"YHONA_monitoring/YHONA_COMU_allyears"
   anadir<-"/Volumes/GoogleDrive/My Drive/Seabird_Oceanography_Lab/COMU_TopDown_BottomUp/YHONA_tdbu_Analysis/"
 }
 
@@ -24,13 +25,13 @@ if(Sys.info()[["user"]]=="rachaelorben") {
 #2015: CR05 & CR06: no eggs
 #2016: CR03 only 2 eggs, CR05 no eggs
 
-files<-list.files(paste0(dir),pattern = "Productivity_Summary",full.names = T,recursive = T)
+files<-list.files(paste0(gdir,dir),pattern = "Productivity_Summary",full.names = T,recursive = T)
 prod<-NULL
 #options(warn=2)
 #options(warn=1)
 for (i in 1:length(files)){
     Edat<-read.csv(files[i])
-    Edat$year<-as.numeric(strsplit(str_split(files[i],"/")[[1]][8],"_")[[1]][3])
+    #Edat$year<-as.numeric(strsplit(str_split(files[i],"/")[[1]][8],"_")[[1]][3])
     Edat$Nest_No<-as.character(Edat$Nest_No)
     Edat$Obs_Laying<-str_replace(Edat$Obs_Laying,"No","N")
     Edat$Obs_Pipping_Hatching<-str_replace(Edat$Obs_Pipping_Hatching,"No","N")
@@ -40,6 +41,11 @@ for (i in 1:length(files)){
     
     Edat$First_Chick_Obs<-mdy(Edat$First_Chick_Obs)
     Edat$Last_Chick_Obs<-mdy(Edat$Last_Chick_Obs)
+    Edat$year<-year(Edat$First_Egg_Obs)
+    
+    for (k in 1:nrow(Edat)){ #replaces NA year with the year from first line
+    if(is.na(Edat$year[k])==TRUE){Edat$year[k]<-Edat$year[1]}
+    }
     
     if (Edat$year[1]==2009){
       Edat$Plot<-str_replace(Edat$Plot,"CR02","CR02/03")
@@ -60,17 +66,16 @@ for (i in 1:length(files)){
     Edat$Comments<-as.character(Edat$Comments)
   prod<-bind_rows(prod,Edat)
 }
-unique(prod$Plot)
+
+prod%>%filter(is.na(year)==TRUE) #shouldn't return any rows
 
 prod$Incub_Period<-as.numeric(prod$First_Chick_Obs-prod$First_Egg_Obs)
 prod$Chick_Age<-as.numeric(prod$Last_Chick_Obs-prod$First_Chick_Obs)
 
 prod<-prod%>%mutate(Total_Duration = ifelse(Chick_Age>0, Incub_Period+Chick_Age, NA))
 
-
-prod%>%filter(Plot=="CR05/06")%>%
-  group_by(Plot,year)%>%summarise(n=n())
-
+#renames plots in a standard way
+unique(prod$Plot)
 prod$Plot<-str_replace(prod$Plot,"CR1","CR01")
 prod$Plot<-str_replace(prod$Plot,"CR2","CR02")
 prod$Plot<-str_replace(prod$Plot,"CR3","CR03")
@@ -132,15 +137,18 @@ for (i in 1:nrow(prod)){
   }}
 
 
-
+# what is the minimum number of nests / plot that should be used?
 plotnumbers<-prod%>%group_by(year,Plot)%>%summarise(n_nests=n())
-plotnumbers%>%filter(n_nests<4)
+plotnumbers%>%filter(n_nests<6)
+plotnumbers%>%filter(year==2014)
+plotnumbers%>%filter(year==2015)
 plotnumbers%>%filter(year==2017)
+plotnumbers%>%filter(year==2019)
 min(plotnumbers$n_nests)
 plotnumbers%>%group_by(year)%>%summarise(n_plots=n())
 
-write.csv(prod,paste0(anadir,"/processeddata/COMU_YHONA_NestProd_2007to",max(prod$year,na.rm=TRUE),".csv"))
-saveRDS(prod,paste0(anadir,"/processeddata/COMU_YHONA_NestProd_2007to",max(prod$year,na.rm=TRUE),".rda"))
+#write.csv(prod,paste0(anadir,"/processeddata/COMU_YHONA_NestProd_2007to",max(prod$year,na.rm=TRUE),".csv"))
+#saveRDS(prod,paste0(anadir,"/processeddata/COMU_YHONA_NestProd_2007to",max(prod$year,na.rm=TRUE),".rda"))
 
 
 # Productivity Summary ----------------------------------------------------
@@ -221,7 +229,26 @@ minegg<-prod%>%group_by(year)%>%
   summarise(minEgg=min(First_Egg_Obs,na.rm=TRUE))
 sum_prod<-left_join(sum_prod,minegg,by="year")
 
-COMUold<-read.csv("/Volumes/GoogleDrive/My Drive/Seabird_Oceanography_Lab/COMU_TopDown_BottomUp/YHONA_COMU_1998_2018.csv",nrows=21)
+head(sum_prod)
+sum_prod$year<-as.factor(sum_prod$year)
+sum_prod_lg<-sum_prod%>%
+  select(year, HatchingSuccess, HatchingSuccess_sd, Fledging_Success15,Fledging_Success15_sd,Reproductive_Success15,Reproductive_Success15_sd,n_plots)%>%
+  pivot_longer(!year, names_to = "stage", values_to = "value")
+
+
+# Summary Plot ------------------------------------------------------------
+#need to add plot sample size on top? & sd bars? remove 2019
+ggplot()+
+  geom_col(data=sum_prod_lg%>%filter(stage=="HatchingSuccess" | stage=="Fledging_Success15" |
+                                       stage=="Reproductive_Success15"),
+           aes(x=year, y=value,fill=stage, group=stage),position = 'dodge')
+
+
+
+# Comparison w/ report data -----------------------------------------------
+
+
+COMUold<-read.csv(paste0(gdir,"/COMU_TopDown_BottomUp/YHONA_COMU_1998_2018.csv",nrows=21))
 head(COMUold)
 COMUold<-COMUold[,1:14]
 str(COMUold)

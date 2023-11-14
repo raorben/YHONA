@@ -45,8 +45,16 @@ ggplot()+
   geom_bar(data=disturb%>%
              filter(Event_Type=="Disturbance")%>%
              filter(is.na(Primary_Predator)==FALSE),
-           aes(x=Primary_Predator,fill=as.factor(year)),position = "dodge")
+           aes(x=as.factor(year),fill=Primary_Predator))
 
+#switch to % 
+ggplot() +
+  geom_bar(data=disturb%>%
+             filter(Event_Type=="Disturbance")%>%
+             filter(is.na(Primary_Predator)==FALSE),
+           aes(x="",fill=Primary_Predator),width=1) +
+  coord_polar("y", start=0)+
+  facet_wrap(~year)
 
 # choose analysis timeframe: eggs & chicks --------------------------------
 sum_prod<-readRDS(paste0(usrdir,anadir,"/processeddata/YHONA_COMU_ProductivitySummary_2007-2018.rda"))

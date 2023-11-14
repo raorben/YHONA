@@ -46,6 +46,7 @@ summary(cars)
 Murre diets vary annually and are generally dominated by either herring or sardines (Clupeidae), Pacific sand lance (Ammodytes hexapterus), or smelt (Osmeridae), but occasionally occur in relatively equal proportions in a given year (Fig. 3). Due to the breeding failure at Yaquina Head in 20222, we did not collect diet data at the site, however we did collect diet data at the Pirate Rock murre colony approximately 17 km (11 miles) north off of Depoe Bay, Oregon. Murres diets at Pirate Rock in 2022 were dominated by smelts (~36% of observations) and clupeids (anchovy, herring, sardines; ~21%). Juvenile salmon, which are grouped with the ‘other’ category in Fig. 3, accounted for approximately 7.2% of the sampled diet; higher than observed at YHONA in recent years (Fig. 3).Analysis is forthcoming. 
 
 ```{r cars2}
+knitr::opts_chunk$set(echo = FALSE)
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
