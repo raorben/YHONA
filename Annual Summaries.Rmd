@@ -1,0 +1,315 @@
+---
+title: "Yaquina Head Annual Summary"
+author: "Will Kennerley & Rachael Orben"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(stringr)
+
+
+if(Sys.info()[7]=="kennerlw") {usr<-"/Users/kennerlw";
+dir<-"/Box/Seabird Oceanography Lab/Current_Research/Seabird_Monitoring/Data Summaries"}
+setwd(paste0(usr,dir))
+
+file_list<-list.files(paste0(usr,dir,"/data by year/"),pattern = ".csv",full.names = T,recursive = T)
+file_list
+
+for (file in file_list) {
+  # Read the data
+  data <- read.csv(file)  # Adjust encoding if necessary
+  
+  # Clean up the name by removing the folder path and extension
+  clean_name <- gsub("\\.csv$", "", basename(file))  # Get the file name without extension
+  
+  # Assign the data frame to a variable in the global environment
+  assign(clean_name, data, envir = .GlobalEnv)
+}
+
+# Step 1: Get all objects in the environment
+all_objects <- ls()
+all_objects
+
+# Step 2: Filter to keep only data frames
+rm(data)
+data_frames <- all_objects[sapply(all_objects, function(x) is.data.frame(get(x)))]
+data_frames
+
+
+# Step 3: Group by prefix
+# Create a named list where the names are the prefixes
+grouped_dfs <- split(data_frames, gsub("_.*", "", data_frames))
+(grouped_dfs)
+
+
+# Step 4: Combine data frames by prefix
+for (group_name in names(grouped_dfs)) {
+  # Create a combined data frame using bind_rows
+  combined_df <- bind_rows(lapply(grouped_dfs[[group_name]], get))
+  
+  # Assign the combined data frame a new name in the global environment
+  assign(paste0(group_name, "_combined"), combined_df)
+}
+
+group_name
+
+
+# HAZAH! It worked!!
+# Now you can access your combined data frames
+
+```
+
+Effort Calculations for 2024 Field Season
+
+```{r}
+# EFFORT CALCULATIONS
+# calculate daily time spent working in hours
+effort_combined$time <- as.numeric(as.POSIXct(effort_combined$stop,format = "%H:%M") - as.POSIXct(effort_combined$start,format = "%H:%M"))/60
+
+( effort <- effort_combined %>%
+    filter(activity == "NestChecks") %>%
+    group_by(year,colony) %>%
+    summarise(Num_ObsEvents = n(),
+              Days_Obs = length(unique(date)),
+              Total_Duration = sum(time, na.rm = T),
+              Human_hours = sum(time*num_obs))) 
+
+# ALL EFFORT, INCLUDING FEEDRATE AND PREY
+( effort <- effort_combined %>%
+    group_by(year,colony) %>%
+    summarise(Num_ObsEvents = n(),
+              Days_Obs = length(unique(date)),
+              Total_Duration = sum(time, na.rm = T),
+              Human_hours = sum(time*num_obs)))
+
+write.csv(effort,"output/seabird_effort.csv")
+
+```
+Disturbance Summaries
+
+```{r}
+## DISTURBANCE SUMMARIES
+head(disturbance_combined)
+
+# get disturbance duration in minutes
+disturbance_combined$duration <- as.numeric(as.POSIXct(disturbance_combined$end_time,format = "%H:%M") - as.POSIXct(disturbance_combined$start_time,format = "%H:%M"))/60
+
+# add total number of eagles involved per disturbance
+disturbance_combined$TBAEA <- (disturbance_combined$ABAEA + disturbance_combined$SABAE + disturbance_combined$UNBAEA)
+
+
+( disturbances <- disturbance_combined %>%
+    group_by(year,colony) %>%
+    summarise(Num_Events = n(),
+              Days_Obs = length(unique(date)),
+              Total_Duration = sum(as.numeric(duration), na.rm=T),
+              Mean_Duration = mean(duration, na.rm=T),
+              Mean_Percent_Cleared = mean(pcleared, na.rm=T),
+              Eagles_percent = sum(primary_pred == "BAEA", na.rm=T)/n(),
+              Mean_Num_Eagles = mean(TBAEA[TBAEA > 0], na.rm=T),
+              Total_Ads_PP = sum(primary_pred_adults_taken, na.rm=T),
+              Total_Chicks_PP = sum(primary_pred_chicks_taken, na.rm=T),
+              Total_Eggs_PP = sum(primary_pred_eggs_taken, na.rm=T),
+              Total_Chicks_SP = sum(sec_pred_chicks_taken, na.rm=T),
+              Total_Eggs_PP = sum(sec_pred_eggs_taken, na.rm=T)))
+
+write.csv(disturbances,"output/colony_disturbances.csv")
+```
+
+Western Gulls
+
+```{r}
+# WESTERN GULL REPRO SUMMARIES
+# remove example line
+wegu_combined <- wegu_combined[!wegu_combined$colony %in% "example",]
+
+head(wegu_combined)
+summary(wegu_combined)
+
+
+( wegu_prod <- wegu_combined %>%
+    group_by(year,colony) %>%
+    summarise(Sample_Size  = n(),
+              
+              First_Lay = min(as.Date(egg_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              
+              Clutch_Size = mean(num_eggs[num_eggs>0], na.rm = T),
+              
+              Brood_Size = mean(num_hatched[num_hatched >0], na.rm = T),
+              
+              First_Hatch = min(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              
+              Median_Hatch = median(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),    
+              
+              Hatch_Success = (sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)/
+                  sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) ~ num_eggs, TRUE ~ NA_real_), na.rm=T)),
+              
+              Fledge_Success = (sum(case_when(!is.na(num_fledged) & !is.na(num_hatched) ~ num_fledged, TRUE ~ NA_real_), na.rm=T)/
+                  sum(case_when(!is.na(num_fledged) & !is.na(num_hatched) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)),
+              
+              Nest_Succcess = (sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)/
+                 sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) ~ num_eggs, TRUE ~ NA_real_), na.rm=T)),
+              
+              Productivity = mean(case_when(!is.na(num_fledged) ~ num_fledged, TRUE ~ NA_real_), na.rm=T)) )
+write.csv(wegu_prod,"output/wegu_repro_output.csv")
+```
+
+Cormorants
+
+```{r}
+# CORMORANT REPRO SUMMARIES
+head(cormorant_combined)
+# remove example line
+cormorant_combined <- cormorant_combined[!cormorant_combined$colony %in% "example",]
+unique(cormorant_combined$colony)
+
+# I think it's easier to split them by species but the "filter" can easily be removed
+## so long as you group by "species", too
+
+
+( Brandts_prod <- cormorant_combined %>%
+    filter(species == "BRAC") %>%
+    group_by(colony, year) %>%
+    summarise(Sample_Size  = n(),
+
+              First_Lay = min(as.Date(egg_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              
+              Clutch_Size = mean(num_eggs[num_eggs>0], na.rm = T),
+              
+              Brood_Size = mean(num_hatched[num_hatched >0], na.rm = T),
+              
+              First_Hatch = min(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              
+              Median_Hatch = median(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),    
+              
+              Hatch_Success = (sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) & num_eggs>0 ~ num_hatched, TRUE ~ NA_real_), na.rm=T)/sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) & num_eggs>0 ~ num_eggs, TRUE ~ NA_real_), na.rm=T)),
+              
+              Fledge_Success = (sum(case_when(!is.na(num_fledged) & !is.na(num_hatched) ~ num_fledged, TRUE ~ NA_real_), na.rm=T)/
+                sum(case_when(!is.na(num_fledged) & !is.na(num_hatched) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)),
+              
+              Nest_Succcess = (sum(case_when(!is.na(num_eggs) & !is.na(num_hatched & num_eggs>0) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)/sum(case_when(!is.na(num_eggs) & !is.na(num_hatched & num_eggs>0) ~ num_eggs, TRUE ~ NA_real_), na.rm=T)),
+              
+              Productivity = mean(case_when(!is.na(num_fledged) ~ num_fledged, TRUE ~ NA_real_), na.rm=T)) )
+
+
+
+( Pelagic_prod <- cormorant_combined %>%
+    filter(species == "PECO") %>%
+    group_by(colony, year) %>%
+    summarise(Sample_Size  = n(),
+              
+              First_Lay = min(as.Date(egg_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              
+              Clutch_Size = mean(num_eggs[num_eggs>0], na.rm = T),
+              
+              Brood_Size = mean(num_hatched[num_hatched >0], na.rm = T),
+              
+              First_Hatch = min(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              
+              Median_Hatch = median(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),    
+              
+              Hatch_Success = (sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) & num_eggs>0 ~ num_hatched, TRUE ~ NA_real_), na.rm=T)/ sum(case_when(!is.na(num_eggs) & !is.na(num_hatched) & num_eggs>0 ~ num_eggs, TRUE ~ NA_real_), na.rm=T)),
+              
+              Fledge_Success = (sum(case_when(!is.na(num_fledged) & !is.na(num_hatched) ~ num_fledged, TRUE ~ NA_real_), na.rm=T)/
+                sum(case_when(!is.na(num_fledged) & !is.na(num_hatched) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)),
+              
+              Nest_Succcess = (sum(case_when(!is.na(num_eggs) & !is.na(num_hatched & num_eggs>0) ~ num_hatched, TRUE ~ NA_real_), na.rm=T)/sum(case_when(!is.na(num_eggs) & !is.na(num_hatched & num_eggs>0) ~ num_eggs, TRUE ~ NA_real_), na.rm=T)),
+              
+              Productivity = mean(case_when(!is.na(num_fledged) ~ num_fledged, TRUE ~ NA_real_), na.rm=T)) )
+write.csv(Pelagic_prod,"output/peco_repro_output.csv")
+write.csv(Brandts_prod,"output/brac_repro_output.csv")
+```
+
+Murre Summaries
+
+```{r}
+
+
+## MURRE REPRO SUMMARY
+# remove example line
+comu_combined <- comu_combined[!comu_combined$colony %in% "example",]
+
+head(comu_combined)
+( murre_plots <- comu_combined %>%
+    group_by(year,colony,analysis_plot) %>%
+    summarise(Sample_Size  = n(),
+              Hatch_Success = sum(num_hatched, na.rm=T)/sum(num_eggs, na.rm=T),
+              # if else statement so that fledge success automatically 0 if hatch success 0, otherwise error
+              Fledge_Success = ifelse(Hatch_Success == 0, 0, sum(num_fledged, na.rm=T)/(sum(num_hatched, na.rm=T))),
+              Nest_Success = sum(num_fledged, na.rm = T)/length(which(num_eggs > 0)),
+              Productivity = sum(num_fledged, na.rm = T)/length(which(num_eggs > 0)),
+              First_Lay = min(as.Date(first_egg_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              First_Hatch = min(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T),
+              Med_Hatch = median(as.Date(chick_first_obs, "%m/%d/%Y", tz="US/Pacific"), na.rm=T)))
+
+
+
+( murre_prod <- murre_plots %>%
+    group_by(colony, year) %>%
+    summarise(Num_Plots  = n(),
+              Num_Nests = sum(Sample_Size),
+              First_Lay = min(First_Lay),
+              First_Hatch = min(First_Hatch, na.rm=T),
+              Med_Hatch = mean(Med_Hatch, na.rm=T),
+              Hatch_Success = mean(Hatch_Success, na.rm=T),                 
+              Fledge_Success = mean(Fledge_Success, na.rm=T),
+              Productivity = mean(Productivity, na.rm=T)
+              ))
+write.csv(murre_prod,"output/comu_repro_output.csv")
+```
+
+Let's make some plots for our various reports
+```{r}
+
+# Plot Murre Hatch Date Anomaly
+( Murre_hatch_anomaly <- murre_prod %>%
+  filter(colony == "YHONA") %>%
+  group_by(year) %>%
+  summarise(Med_Hatch_Yday = yday(Med_Hatch),
+    Hatch_Anom = Med_Hatch_Yday - mean(yday(murre_prod$Med_Hatch), na.rm = T) ) %>%
+   ggplot() + 
+    geom_bar(aes(x=year, y=Hatch_Anom), fill="#2b8cbe", stat="identity") +
+    geom_smooth(aes(x=year,y=Hatch_Anom), color="black", se=F, method="gam") +
+    theme_bw() +
+    xlab("Year") +
+    ylab("Common Murre Hatch Date Anomaly") +
+    theme(axis.title = element_text(face="bold"))
+     )
+
+ 
+# Plot murre reproductive success
+(Murre_repro_succ <- murre_prod %>%
+    filter(colony=="YHONA") %>%
+    ggplot() +
+    geom_bar(aes(x=year,y=Productivity), fill="#2b8cbe", stat="identity") +
+    geom_smooth(aes(x=year,y=Productivity), color="black", se=F, method="gam") +
+    theme_bw() +
+    xlab("Year") +
+    ylab("Common Murre Productivity") +
+    theme(axis.title = element_text(face="bold"))
+     )
+
+
+# Plot murre repro success as hatch and fledge percentage
+(Murre_repro_succ <- murre_prod %>%
+    filter(colony=="YHONA") %>%
+    ggplot() +
+    geom_line(aes(x=year,y=Hatch_Success), color="#2b8cbe", size=1.5) +
+    geom_line(aes(x=year,y=Productivity), color="#fc9272", size=1.5) +
+    theme_bw() +
+    xlab("Year") +
+    ylab("Common Murre Reproductive Success") +
+    theme(axis.title = element_text(face="bold"),
+          legend.position = "right") +
+    annotate("text",x=2011.5,y=0.75,label="Hatch \n Success",color="#2b8cbe",size=3.5) +
+    annotate("text",x=2008.9,y=0.6,label="Productivity",color="#fc9272",size=3.5)
+     )
+```
+
